@@ -556,7 +556,7 @@ unsafe extern "C" fn x_crsql_as_crr(
     let (schema_name, table_name) = if argc == 2 {
         (args[0].text(), args[1].text())
     } else {
-        ("main\0", args[0].text())
+        ("main", args[0].text())
     };
 
     let db = ctx.db_handle();
@@ -566,14 +566,8 @@ unsafe extern "C" fn x_crsql_as_crr(
         ctx.result_error("failed to start as_crr savepoint");
         return;
     }
-    let rc = crsql_create_crr(
-        db,
-        schema_name.as_ptr() as *const c_char,
-        table_name.as_ptr() as *const c_char,
-        0,
-        0,
-        &mut err_msg as *mut _,
-    );
+    let rc = create_crr(db, schema_name, table_name, false, false, &mut err_msg)
+        .unwrap_or_else(|err| err) as c_int;
     if rc != ResultCode::OK as c_int {
         sqlite::result_error(ctx, err_msg, -1);
         sqlite::result_error_code(ctx, rc);
@@ -666,14 +660,8 @@ unsafe extern "C" fn x_crsql_commit_alter(
     );
 
     let rc = if rc == ResultCode::OK as c_int {
-        crsql_create_crr(
-            db,
-            schema_name.as_ptr() as *const c_char,
-            table_name.as_ptr() as *const c_char,
-            1,
-            0,
-            &mut err_msg as *mut _,
-        )
+        create_crr(db, schema_name, table_name, true, false, &mut err_msg)
+            .unwrap_or_else(|err| err) as c_int
     } else {
         rc
     };
