@@ -1,11 +1,11 @@
-#![no_std]
-#![feature(core_intrinsics)]
-#![feature(lang_items)]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), feature(core_intrinsics))]
+#![cfg_attr(not(feature = "std"), feature(lang_items))]
 
 extern crate alloc;
 
-use core::alloc::GlobalAlloc;
 use core::ffi::c_char;
+#[cfg(not(feature = "std"))]
 use core::panic::PanicInfo;
 use crsql_core;
 use crsql_core::sqlite3_crsqlcore_init;
@@ -20,14 +20,15 @@ use sqlite_nostd::SQLite3Allocator;
 #[global_allocator]
 static ALLOCATOR: SQLite3Allocator = SQLite3Allocator {};
 
-// This must be our panic handler for WASM builds. For simplicity, we make it our panic handler for
-// all builds. Abort is also more portable than unwind, enabling us to go to more embedded use cases.
+// The native Cargo loadable links std, which supplies the panic runtime. The
+// no-std builds retain the bundle's abort behavior.
+#[cfg(not(feature = "std"))]
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     core::intrinsics::abort()
 }
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(all(not(feature = "std"), not(target_family = "wasm")))]
 #[lang = "eh_personality"]
 extern "C" fn eh_personality() {}
 

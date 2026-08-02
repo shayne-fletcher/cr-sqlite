@@ -13,7 +13,7 @@ name = "crsqlite"
 crate-type = ["cdylib"]
 
 [dependencies]
-crsql_bundle = { path = "core/rs/bundle", features = ["loadable_extension"] }
+crsql_bundle = { path = "core/rs/bundle", features = ["loadable_extension", "std"] }
 sqlite_nostd = { path = "core/rs/sqlite-rs-embedded/sqlite_nostd", features = ["loadable_extension"] }
 
 [build-dependencies]
