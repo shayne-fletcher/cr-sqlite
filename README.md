@@ -1,4 +1,17 @@
-# cr-sqlite
+<h1 align="center">cr-sqlite</h1>
+
+<p align="center">
+  Cargo-native conflict-free replicated relations for SQLite
+</p>
+
+<p align="center">
+  <a href="https://github.com/shayne-fletcher/cr-sqlite/actions/workflows/ci.yml">
+    <img src="https://github.com/shayne-fletcher/cr-sqlite/actions/workflows/ci.yml/badge.svg" alt="rust ci">
+  </a>
+  <a href="https://shayne-fletcher.github.io/cr-sqlite/">
+    <img src="https://img.shields.io/badge/docs-github.io-blue" alt="docs">
+  </a>
+</p>
 
 This repository is a fork of
 [`vlcn-io/cr-sqlite`](https://github.com/vlcn-io/cr-sqlite) focused on building
