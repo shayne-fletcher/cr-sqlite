@@ -54,3 +54,8 @@ bindeps = true
 Cargo makes the built library path available while compiling the consumer as
 `CARGO_CDYLIB_FILE_CRSQLITE_crsqlite`.  Pass that path to SQLite or libSQL when
 loading the extension.
+
+## Development
+
+See [DEVELOPING.md](DEVELOPING.md) for the source layout, upstream remotes, and
+the procedure for reconstructing and building an exact pinned revision.
