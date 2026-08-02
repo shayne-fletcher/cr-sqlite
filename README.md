@@ -1,10 +1,3 @@
-<p align="center">
-  <img
-    src="./images/crr.png"
-    width="720"
-    alt="cr-sqlite replicas converging through CRR changes">
-</p>
-
 <h1 align="center">cr-sqlite</h1>
 
 <p align="center">
