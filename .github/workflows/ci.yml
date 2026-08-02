@@ -65,6 +65,7 @@ jobs:
           mkdir -p core/dist
           cp "$artifact" "$dist"
           echo "CRSQLITE_ARTIFACT=$artifact" >> "$GITHUB_ENV"
+          echo "CRSQLITE_LOAD_PATH=$PWD/core/dist/crsqlite" >> "$GITHUB_ENV"
 
       - name: Inspect the extension
         shell: bash
@@ -94,7 +95,7 @@ jobs:
         run: |
           output=$(sqlite3 :memory: <<SQL
           .bail on
-          .load $CRSQLITE_ARTIFACT sqlite3_crsqlite_init
+          .load $CRSQLITE_LOAD_PATH sqlite3_crsqlite_init
           CREATE TABLE foo (id INTEGER PRIMARY KEY NOT NULL, value TEXT);
           SELECT crsql_as_crr('foo');
           INSERT INTO foo VALUES (1, 'alice');
@@ -113,7 +114,8 @@ jobs:
             --locked
 
       - name: Install Python test dependencies
-        run: python -m pip install -r py/correctness/requirements.txt
+        working-directory: py/correctness
+        run: python -m pip install -r requirements.txt
 
       - name: Run Python correctness tests
         working-directory: py/correctness
