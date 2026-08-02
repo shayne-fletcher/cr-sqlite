@@ -13,15 +13,9 @@ crate-type = ["rlib"]
 # "cdylib" <-- only enable cdylib if loadable_extension is enabled
 
 [dependencies]
-crsql_fractindex_core = {path="../fractindex-core"}
-crsql_core = { path="../core" }
-sqlite_nostd = { path="../sqlite-rs-embedded/sqlite_nostd" }
-
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
+crsql_fractindex_core = { path = "../fractindex-core" }
+crsql_core = { path = "../core" }
+sqlite_nostd = { path = "../sqlite-rs-embedded/sqlite_nostd" }
 
 [features]
 test = ["crsql_core/test"]

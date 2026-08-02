@@ -11,18 +11,14 @@ name = "crsql_core"
 crate-type = ["rlib"]
 
 [dependencies]
-sqlite_nostd = { path="../sqlite-rs-embedded/sqlite_nostd" }
-bytes = { version = "1.5", default-features = false }
+sqlite_nostd = { path = "../sqlite-rs-embedded/sqlite_nostd" }
+# cr-sqlite 0.16.3's correctness suite is incompatible with newer 1.x
+# releases of bytes.
+bytes = { version = "=1.5.0", default-features = false }
 num-traits = { version = "0.2.17", default-features = false }
 num-derive = "0.4.1"
 
 [dev-dependencies]
-
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
 
 [features]
 test = []

@@ -1,0 +1,42 @@
+[package]
+name = "cr-sqlite"
+version = "0.16.3"
+edition = "2021"
+license = "MIT"
+description = "A conflict-free replicated relation extension for SQLite"
+repository = "https://github.com/shayne-fletcher/cr-sqlite"
+readme = "README.md"
+build = "build.rs"
+
+[lib]
+name = "crsqlite"
+crate-type = ["cdylib"]
+
+[dependencies]
+crsql_bundle = { path = "core/rs/bundle", features = ["loadable_extension"] }
+sqlite_nostd = { path = "core/rs/sqlite-rs-embedded/sqlite_nostd", features = ["loadable_extension"] }
+
+[build-dependencies]
+cc = "1"
+
+[workspace]
+members = [
+  "core/rs/bundle",
+  "core/rs/core",
+  "core/rs/fractindex-core",
+  "core/rs/sqlite-rs-embedded/sqlite3_allocator",
+  "core/rs/sqlite-rs-embedded/sqlite3_capi",
+  "core/rs/sqlite-rs-embedded/sqlite_nostd",
+]
+exclude = [
+  "core/rs/bundle_static",
+  "core/rs/integration_check",
+  "core/rs/sqlite-rs-embedded/sqlite_web",
+]
+resolver = "2"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

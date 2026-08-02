@@ -60,14 +60,18 @@ static void closeHook(void *pUserData, sqlite3 *db) {
 void *sqlite3_crsqlrustbundle_init(sqlite3 *db, char **pzErrMsg,
                                    const sqlite3_api_routines *pApi);
 
+#ifndef CRSQLITE_ENTRYPOINT
+#define CRSQLITE_ENTRYPOINT sqlite3_crsqlite_init
+#endif
+
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-    int sqlite3_crsqlite_init(sqlite3 *db, char **pzErrMsg,
-                              const sqlite3_api_routines *pApi
+    int CRSQLITE_ENTRYPOINT(sqlite3 *db, char **pzErrMsg,
+                            const sqlite3_api_routines *pApi
 #ifdef LIBSQL
-                              ,
-                              const libsql_api_routines *pLibsqlApi
+                            ,
+                            const libsql_api_routines *pLibsqlApi
 #endif
     ) {
   int rc = SQLITE_OK;
