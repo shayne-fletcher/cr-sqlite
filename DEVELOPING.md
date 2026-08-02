@@ -35,11 +35,10 @@ building:
 test "$(git -C "$checkout_dir/cr-sqlite" rev-parse HEAD)" = "$revision"
 git -C "$checkout_dir/cr-sqlite" submodule status --recursive
 
-cargo build \
-  --manifest-path "$checkout_dir/cr-sqlite/Cargo.toml" \
-  -p cr-sqlite \
-  --release \
-  --locked
+(
+  cd "$checkout_dir/cr-sqlite"
+  cargo build -p cr-sqlite --release --locked
+)
 ```
 
 No adjacent checkout is required.  The public HTTPS submodule URL and the
