@@ -2,10 +2,6 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 fn main() {
-    if env::var("CARGO_CFG_TARGET_FAMILY").as_deref() == Ok("unix") {
-        println!("cargo:rustc-link-lib=c");
-    }
-
     let source_dir = PathBuf::from("core/src");
     let sqlite_dir = source_dir.join("sqlite");
     let sources = ["crsqlite.c", "changes-vtab.c", "ext-data.c"];
@@ -47,6 +43,15 @@ fn main() {
         .pic(true)
         .warnings(true)
         .compile("crsqlite_c");
+
+    if env::var("CARGO_CFG_TARGET_FAMILY").as_deref() == Ok("unix") {
+        println!("cargo:rustc-link-lib=c");
+    }
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux")
+        && env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("gnu")
+    {
+        println!("cargo:rustc-link-lib=gcc_s");
+    }
 }
 
 fn rerun_if_changed(path: &Path) {
