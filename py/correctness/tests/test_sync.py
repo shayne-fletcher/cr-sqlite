@@ -381,59 +381,47 @@ def test_merge_same():
     assert (changes == [('foo', b'\x01\t\x01', 'b', 2, 1, 1, site_id, 1, 0)])
 
 def test_merge_same_w_tie_breaker():
-    db1 = create_basic_db()
-    db2 = create_basic_db()
-    db3 = create_basic_db()
+    dbs = [create_basic_db() for _ in range(3)]
 
-    db1.execute("INSERT INTO foo (a,b) VALUES (1,2);")
-    db1.execute("SELECT crsql_config_set('merge-equal-values', 1);")
-    db1.commit()
+    for db in dbs:
+        db.execute("INSERT INTO foo (a,b) VALUES (1,2);")
+        db.execute("SELECT crsql_config_set('merge-equal-values', 1);")
+        db.commit()
 
-    db2.execute("INSERT INTO foo (a,b) VALUES (1,2);")
-    db2.execute("SELECT crsql_config_set('merge-equal-values', 1);")
-    db2.commit()
+    site_ids = [get_site_id(db) for db in dbs]
 
-    db3.execute("INSERT INTO foo (a,b) VALUES (1,2);")
-    db3.execute("SELECT crsql_config_set('merge-equal-values', 1);")
-    db3.commit()
+    def sync_all():
+        for source in dbs:
+            for target in dbs:
+                if source is not target:
+                    sync_left_to_right(source, target, 0)
 
-    sync_left_to_right(db1, db2, 0)
-    changes2 = db2.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-    
-    sync_left_to_right(db2, db1, 0)
-    changes1 = db1.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
+    def get_changes(db):
+        return db.execute(
+            """
+            SELECT "table", pk, cid, val, col_version, site_id, db_version
+            FROM crsql_changes
+            """
+        ).fetchall()
 
-    sync_left_to_right(db2, db3, 0)
-    changes3 = db3.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
+    sync_all()
+    converged = [get_changes(db) for db in dbs]
 
-    # check that everything by db_version is the same
-    assert (changes2[:-6] == changes1[:-6] == changes3[:-6])
+    expected = (
+        "foo",
+        b'\x01\t\x01',
+        "b",
+        2,
+        1,
+        max(site_ids),
+    )
+    assert all(len(changes) == 1 for changes in converged)
+    assert all(changes[0][:-1] == expected for changes in converged)
 
-    # Test that we're stable / do not loop when we tie break equal values
-
-    sync_left_to_right(db2, db1, 0)
-    changes1_2 = db1.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-    sync_left_to_right(db3, db2, 0)
-    changes2_2 = db2.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-    sync_left_to_right(db1, db3, 0)
-    changes3_2 = db3.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-
-    # everything should stay the same, including db_version
-    assert (changes1 == changes1_2)
-    assert (changes2 == changes2_2)
-    assert (changes3 == changes3_2)
-
-    sync_left_to_right(db3, db1, 0)
-    changes1_2 = db1.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-    sync_left_to_right(db1, db2, 0)
-    changes2_2 = db2.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-    sync_left_to_right(db2, db3, 0)
-    changes3_2 = db3.execute("SELECT \"table\", pk, cid, val, col_version, site_id, db_version FROM crsql_changes").fetchall()
-
-    # everything should stay the same, including db_version
-    assert (changes1 == changes1_2)
-    assert (changes2 == changes2_2)
-    assert (changes3 == changes3_2)
+    # A complete sync after convergence must not change any database,
+    # including its local db_version.
+    sync_all()
+    assert [get_changes(db) for db in dbs] == converged
 
 
 def test_merge_matching_clocks_lesser_value():
